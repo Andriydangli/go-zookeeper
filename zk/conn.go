@@ -1072,6 +1072,41 @@ func (c *Conn) Create(path string, data []byte, flags int32, acl []ACL) (string,
 	return res.Path, err
 }
 
+func isExist(c *Conn,path string) error{
+	_,_,err := c.Get(path)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *Conn) CreateRecursively(path string,data []byte) (string, error) {
+	pathSlice := strings.Split(path,"/")
+	if len(pathSlice) == 1 {
+		_,err := c.Create(path,data,0,WorldACL(PermAll))
+		if err != nil {
+			return "",err
+		}
+		return path,nil
+	}
+	newPath := ""
+	for i:=1;i<len(pathSlice)-1;i++{
+		newPath += "/" + pathSlice[i]
+		if err := isExist(c,newPath);err != nil{
+			if _,err := c.Create(newPath,nil,0,WorldACL(PermAll));err != nil{
+				return "", err
+			}
+			continue
+		}
+		continue
+	}
+	_,err := c.Create(path,data,0,WorldACL(PermAll))
+	if err != nil {
+		return "",err
+	}
+	return path,nil
+}
+
 // CreateProtectedEphemeralSequential fixes a race condition if the server crashes
 // after it creates the node. On reconnect the session may still be valid so the
 // ephemeral node still exists. Therefore, on reconnect we need to check if a node
