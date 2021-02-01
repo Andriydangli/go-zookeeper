@@ -10,6 +10,7 @@ Possible watcher events:
 */
 
 import (
+	"code.byted.org/inf/go-zookeeper_bak/zk"
 	"crypto/rand"
 	"encoding/binary"
 	"errors"
@@ -1163,6 +1164,25 @@ func (c *Conn) Delete(path string, version int32) error {
 
 	_, err := c.request(opDelete, &DeleteRequest{path, version}, &deleteResponse{}, nil)
 	return err
+}
+
+func (c *Conn)DeleteRecursively(path string) error {
+	childrens,_,err := c.Children(path)
+	if err != nil{
+		panic(err)
+	}
+	if len(childrens) != 0 {
+		fmt.Println(childrens)
+		for _, chil := range childrens {
+			newPath := path + "/" + chil
+			if err := c.Delete(newPath,0);err == zk.ErrNotEmpty{
+				c.DeleteRecursively(newPath)
+			}
+			c.Delete(chil,0)
+		}
+	}
+	c.Delete(path,0)
+	return nil
 }
 
 func (c *Conn) Exists(path string) (bool, *Stat, error) {
