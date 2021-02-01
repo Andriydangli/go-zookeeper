@@ -1167,6 +1167,9 @@ func (c *Conn) Delete(path string, version int32) error {
 }
 
 func (c *Conn)DeleteRecursively(path string) error {
+	if err := validatePath(path, false); err != nil {
+		return err
+	}
 	childrens,_,err := c.Children(path)
 	if err != nil{
 		panic(err)
