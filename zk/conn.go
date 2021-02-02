@@ -1174,7 +1174,6 @@ func (c *Conn) DeleteRecursively(path string) error {
 		panic(err)
 	}
 	if len(childrens) != 0 {
-		fmt.Println(childrens)
 		for _, chil := range childrens {
 			newPath := path + "/" + chil
 			if err := c.Delete(newPath, 0); err == ErrNotEmpty {
