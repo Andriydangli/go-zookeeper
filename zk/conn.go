@@ -10,7 +10,7 @@ Possible watcher events:
 */
 
 import (
-	"code.byted.org/inf/go-zookeeper_bak/zk"
+	"github.com/Andriydangli/go-zookeeper/zk"
 	"crypto/rand"
 	"encoding/binary"
 	"errors"
