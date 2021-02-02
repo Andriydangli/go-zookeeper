@@ -21,8 +21,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"github.com/Andriydangli/go-zookeeper/zk"
 )
 
 // ErrNoServer indicates that an operation cannot be completed
@@ -1179,7 +1177,7 @@ func (c *Conn) DeleteRecursively(path string) error {
 		fmt.Println(childrens)
 		for _, chil := range childrens {
 			newPath := path + "/" + chil
-			if err := c.Delete(newPath, 0); err == zk.ErrNotEmpty {
+			if err := c.Delete(newPath, 0); err == ErrNotEmpty {
 				c.DeleteRecursively(newPath)
 			}
 			c.Delete(chil, 0)
