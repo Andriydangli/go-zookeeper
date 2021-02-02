@@ -10,7 +10,6 @@ Possible watcher events:
 */
 
 import (
-	"github.com/Andriydangli/go-zookeeper/zk"
 	"crypto/rand"
 	"encoding/binary"
 	"errors"
@@ -22,6 +21,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/Andriydangli/go-zookeeper/zk"
 )
 
 // ErrNoServer indicates that an operation cannot be completed
@@ -1073,39 +1074,39 @@ func (c *Conn) Create(path string, data []byte, flags int32, acl []ACL) (string,
 	return res.Path, err
 }
 
-func isExist(c *Conn,path string) error{
-	_,_,err := c.Get(path)
+func isExist(c *Conn, path string) error {
+	_, _, err := c.Get(path)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *Conn) CreateRecursively(path string,data []byte) (string, error) {
-	pathSlice := strings.Split(path,"/")
+func (c *Conn) CreateRecursively(path string, data []byte) (string, error) {
+	pathSlice := strings.Split(path, "/")
 	if len(pathSlice) == 1 {
-		_,err := c.Create(path,data,0,WorldACL(PermAll))
+		_, err := c.Create(path, data, 0, WorldACL(PermAll))
 		if err != nil {
-			return "",err
+			return "", err
 		}
-		return path,nil
+		return path, nil
 	}
 	newPath := ""
-	for i:=1;i<len(pathSlice)-1;i++{
+	for i := 1; i < len(pathSlice)-1; i++ {
 		newPath += "/" + pathSlice[i]
-		if err := isExist(c,newPath);err != nil{
-			if _,err := c.Create(newPath,nil,0,WorldACL(PermAll));err != nil{
+		if err := isExist(c, newPath); err != nil {
+			if _, err := c.Create(newPath, nil, 0, WorldACL(PermAll)); err != nil {
 				return "", err
 			}
 			continue
 		}
 		continue
 	}
-	_,err := c.Create(path,data,0,WorldACL(PermAll))
+	_, err := c.Create(path, data, 0, WorldACL(PermAll))
 	if err != nil {
-		return "",err
+		return "", err
 	}
-	return path,nil
+	return path, nil
 }
 
 // CreateProtectedEphemeralSequential fixes a race condition if the server crashes
@@ -1166,25 +1167,25 @@ func (c *Conn) Delete(path string, version int32) error {
 	return err
 }
 
-func (c *Conn)DeleteRecursively(path string) error {
+func (c *Conn) DeleteRecursively(path string) error {
 	if err := validatePath(path, false); err != nil {
 		return err
 	}
-	childrens,_,err := c.Children(path)
-	if err != nil{
+	childrens, _, err := c.Children(path)
+	if err != nil {
 		panic(err)
 	}
 	if len(childrens) != 0 {
 		fmt.Println(childrens)
 		for _, chil := range childrens {
 			newPath := path + "/" + chil
-			if err := c.Delete(newPath,0);err == zk.ErrNotEmpty{
+			if err := c.Delete(newPath, 0); err == zk.ErrNotEmpty {
 				c.DeleteRecursively(newPath)
 			}
-			c.Delete(chil,0)
+			c.Delete(chil, 0)
 		}
 	}
-	c.Delete(path,0)
+	c.Delete(path, 0)
 	return nil
 }
 
